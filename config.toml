@@ -17,7 +17,6 @@ paginate = 10
   [languages.zh]
     title = "horochx's blog"
     subtitle = "keep coding and learning"
-    keywords = ""
     # copyright = '<span>© 2019 CC BY-SA 4.0</span>'
     copyright = '© 2019&nbsp;<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>'
     menuMore = "Show more"
