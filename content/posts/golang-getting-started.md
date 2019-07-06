@@ -131,6 +131,8 @@ j = h << 2
 j = i >> 2
 ```
 
+值得一提的是，Go 没有三元运算符，需要用到三元运算符的地方都需要使用 `if-else` 语句来代替。
+
 ## 控制流语句
 
 Go 只有一种循环结构：`for` 循环。Go 中的 `for` 语句有个特点，`for` 后面的三个表达式不需要括号。如：
@@ -201,9 +203,9 @@ default:
 }
 ```
 
-这里需要注意一点：case 表达式是惰性求值的。
+这里需要注意一点：`case` 表达式是惰性求值的。
 
-如果省略 switch 语句的条件表达式语句，那么默认就是 `switch true`。
+如果省略 `switch` 语句的条件表达式语句，那么默认就是 `switch true`。
 
 ## 函数
 
@@ -291,6 +293,55 @@ func main() {
 	fmt.Println(count()) // 2
 	fmt.Println(count()) // 3
 }
+```
+
+在函数内使用 `defer` 关键字可以延迟调用一个函数。函数的参数将会立即求值，而函数调用将会延迟到函数返回时。利用这个特点可以在 `defer` 中回收资源或是修改返回值。如果在函数中多次使用 `defer` ，延迟调用的函数会被推入栈中，先进后出。另外，有两个与 `defer` 配合使用的函数：`panic` 与 `recover`。当函数调用发生错误时，函数会立即返回，然后依次执行 `defer`，全部执行完毕后将会抛出异常。`recover` 函数只能在 `defer` 中使用。如果没有发生异常，将会返回 `nil`。如果发生了异常，会将异常结果捕获，然后程序继续执行。使用 `panic` 可以手动抛出一个异常。例：
+
+```go
+package main
+
+import "fmt"
+
+var list = [3]int{1, 2, 3}
+
+func main() {
+	fmt.Println("调用f...")
+	f()
+	fmt.Println("f返回了")
+}
+
+func f() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("捕获了f调用过程中的异常", r)
+		}
+	}()
+	fmt.Println("调用g...")
+	g(0)
+	fmt.Println("g返回了")
+}
+
+func g(i int) {
+	// 如果取消注释，recover 捕获到的错误是 "数组越界了"
+	// if i > (len(list) - 1) {
+	// 	panic("数组越界了")
+	// }
+	defer fmt.Println("g中的defer", list[i])
+	fmt.Println("g中普通的函数调用", list[i])
+	g(i + 1)
+}
+
+// 执行结果：
+// 调用f...
+// 调用g...
+// g中普通的函数调用 1
+// g中普通的函数调用 2
+// g中普通的函数调用 3
+// g中的defer 3
+// g中的defer 2
+// g中的defer 1
+// 捕获了f调用过程中的异常 runtime error: index out of range
+// f返回了
 ```
 
 ## 指针
@@ -451,7 +502,7 @@ var scaler Scaler = &Vertex{1, 2} // 不能是 Vertex{1, 2} ，因为方法 scal
 
 一个接口类型的值在内部可以看做包含具体的值和值的类型的元组。比如上面这个例子中，接口的具体的值就是 `&Vertex{1, 2}`，而值的类型就是 `*Vertex`。在接口值调用方法时会执行其底层类型的同名方法。
 
-当接口具体的值是 `nil` 时，方法仍然会被调用。这在其它一些语言中，会触发空指针异常。但是在 Go 中不会。为什么呢？因为接口值本身不是 nil，而方法实际上只是带有接收者的函数，因此当接口的具体值是 `nil` 时，方法依然可以调用，只是接收者的值为 `nil`，空指针异常会在方法内部被触发。与此同时，我们就可以在方法内部捕获空指针引用，避免错误。如：
+当接口具体的值是 `nil` 时，方法仍然会被调用。这在其它一些语言中，会触发空指针异常。但是在 Go 中不会。为什么呢？因为接口值本身不是 `nil`，而方法实际上只是带有接收者的函数，因此当接口的具体值是 `nil` 时，方法依然可以调用，只是接收者的值为 `nil`，空指针异常会在方法内部被触发。与此同时，我们就可以在方法内部捕获空指针引用，避免错误。如：
 
 ```go
 type Scaler interface {
@@ -477,9 +528,11 @@ var scaler Scaler = vertex
 scaler.scale(5) // scaler 本身不为 nil，不会触发空指针引用
 ```
 
-需要注意的一点是，当接口值本身为 nil 时，内部既没有保存具体的值，也没有保存具体的类型，因此进行方法调用时无法找到的函数具体调用，从而引发空指针异常。
+需要注意的一点是，当接口值本身为 `nil` 时，内部既没有保存具体的值，也没有保存具体的类型，因此进行方法调用时无法找到的函数具体调用，从而引发空指针异常。
 
-不声明任何方法的空接口可以保存任何类型的值（类似 typescript 中的 any 类型），空接口可以用来处理未知类型的值。Go 还给接口值提供了类型断言的语法，用于判断一个接口值是否保存了某个类型的值。类型断言会返回两个值，第一个值是接口保存的具体的值，第二个值是报告断言是否成功的布尔值。如果类型断言失败且没有读取第二个值则会触发异常。例：
+不声明任何方法的空接口可以保存任何类型的值（类似 typescript 中的 any 类型），空接口可以用来处理未知类型的值。
+
+Go 还给接口值提供了类型断言的语法，用于判断一个接口值是否保存了某个类型的值。类型断言会返回两个值，第一个值是接口保存的具体的值，第二个值是报告断言是否成功的布尔值。如果类型断言失败且没有读取第二个值则会触发异常。例：
 
 ```go
 var a interface{} = "void interface"
@@ -532,7 +585,11 @@ c := [...]int{7, 8, 9} // [...]int 会在编译阶段自动补全为 [3]int
 
 数组类型的长度是不可变的，因此使用时有诸多不便。因此 Go 提供了一个特殊的类型：切片。
 
-切片在本质上是对某个数组其中一个片段的引用，切片只关心它引用的数组的类型，不关心长度。因此，切片的长度不是类型的一部分，长度是可变的。切片类型的写法是 []T ， T 是切片所引用的数组的元素类型。切片具有两个额外的概念：长度与容量。长度是切片当前引用的数组**片段**的长度，而容量是当前切片的起始位置到当前切片所引用的**数组**末尾的长度。切片的长度和容量可以通过 `len` 函数与 `cap` 函数来获取。切片可以从一个已有的数组中创建，也可以通过字面量、内置的 `make` 函数甚至其它切片来创建。通过重新对一个已有的切片重新切片可以改变切片的长度。例：
+切片在本质上是对某个数组其中一个片段的引用，切片只关心它引用的数组的类型，不关心长度。因此，切片的长度不是类型的一部分，长度是可变的。切片类型的写法是 []T ， T 是切片所引用的数组的元素类型。
+
+切片具有两个额外的概念：长度与容量。长度是切片当前引用的数组**片段**的长度，而容量是当前切片的起始位置到当前切片所引用的**数组**末尾的长度。切片的长度和容量可以通过 `len` 函数与 `cap` 函数来获取。
+
+切片可以从一个已有的数组中创建，也可以通过字面量、内置的 `make` 函数甚至其它切片来创建。通过重新对一个已有的切片重新切片可以改变切片的长度。例：
 
 ```go
 originArray := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
@@ -564,13 +621,15 @@ var a []int // a == nil、len(a) == 0、cap(a) == 0，此时 a 没有底层数�
 b := append(a, 10, 20, 30, 40) // [10, 20, 30, 40] len(b) == 4 cap(b) == 4
 
 for index, value := range a {
-	println(index, value) // 什么都不会发生，因为切片 a 依然为零值
+	fmt.Println(index, value) // 什么都不会发生，因为切片 a 依然为零值
 }
 
 for index, value := range b {
-	println(index, value) // 打印了 0 10、1 20、2 30、3 40。
+	fmt.Println(index, value) // 打印了 0 10、1 20、2 30、3 40。
 }
 ```
+
+在使用切片时，需要注意一点：切片是数组的引用，因此即使切片只引用了数组中的几个元素，也会导致整个数组的内存得不到释放，使用不当有可能造成内存泄露。
 
 除了数组以外，Go 还提供了另一个数据类型用于存储一组相同类型的值。类似其它语言中的字典，Go 当中提供了映射类型，用于将键映射到值。映射类型的写法是 `map[Key]Value` ，表示一个键是 `Key` 类型、值是 `Value` 类型的映射。映射是引用类型，零值同样是 `nil`，需要使用 `make` 函数来创建一个映射。例：
 
@@ -607,8 +666,219 @@ detail, isExist := m[City{"福州"}] // detail 是 City{}，isExist 是 false
 
 ## 并发与异步
 
-待续。
+Go 语言最大的特色就是 Go 程（goroutine）。Go 程是由 Go 运行时管理的轻量级线程。使用关键字 go 可以启动一个 Go 程。例：
+
+```go
+go f(x, y, z) // 参数的求值会发生在当前的Go程中，而f的执行发生在新的go程中。
+```
+
+信道是带有类型的管道，通过操作符 `<-` 来发送和接收值。默认情况下，发送和接收操作在另一端准备好之前都会阻塞。与切片和映射类似，信道在使用前也需要使用 `make` 来创建。例：
+
+```go
+package main
+
+import "fmt"
+
+func add(c chan int, num int) {
+	c <- num // 将值送入 c
+}
+
+func sum(c chan int) (reulst int) {
+	x, y := <-c, <-c // 获取信道中的值
+	return x + y
+}
+
+func main() {
+	c := make(chan int) // 创建一个信道
+
+	go add(c, 1)
+	go add(c, 2)
+
+	sum(c) // 返回 3。读取值会被阻塞，直到添加值结束
+}
+```
+
+信道可以是带缓冲的，在使用 `make` 创建信道时，可以提供第二个参数，作为信道的缓冲长度。
+
+不带缓存的信道，信道值是依次发送接收的。而带缓冲的信道，在发送值时仅在缓冲区满时才阻塞，接收值时仅在缓冲区为空时才阻塞。可以简单地把不带缓冲的信道当成缓冲长度为 1 的信道。例：
+
+```go
+// 不带缓冲的信道
+c1 := make(chan int)
+c1 <- 1 // 发送第一个值
+c1 <- 2 // 前一个值尚未被接收，此处发生阻塞
+
+// 带缓冲的信道
+c2 := make(chan int, 2)
+c2 <- 1 // 发送第一个值
+c2 <- 2 // 发送第二个值，此时缓冲区满，继续发送将发生阻塞
+```
+
+接收者可以使用 `for range` 来接收信道所有的值，直到信道被关闭。而发送者则通过 `close` 函数来关闭一个关闭一个信道，表示不再有值会被发送。只有发送者才能关闭信道，也只有通过 `for range` 接收的信道需要被关闭。例：
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func count(c chan int) {
+	for i := 0; i < 10; i++ {
+		c <- i
+	}
+	close(c) // 如果不关闭信道，for range 将会死锁
+}
+
+func main() {
+	c := make(chan int) // 创建一个信道
+
+	go count(c) // 在go程中添加值
+
+	for value := range c {
+		fmt.Println(value)
+	}
+}
+
+```
+
+`select` 语句使一个 Go 程可以等待多个通信操作，`select` 会阻塞到某个分支可以继续执行为止，当多个分支都准备好时会随机选择一个执行。当 `select` 中的其它分支都没有准备好时，`default` 分支就会执行。例：
+
+```go
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+// 假装我是一个网络请求
+func httpRequest(c chan string) {
+	rand.Seed(time.Now().Unix())
+	time.Sleep(time.Duration(rand.Intn(10)+1) * 100 * time.Millisecond)
+	c <- "网络请求结果"
+}
+
+func timeOut(c chan string) {
+	rand.Seed(time.Now().Unix())
+	time.Sleep(time.Duration(rand.Intn(10)+1) * 100 * time.Millisecond)
+	c <- "网络请求超时"
+}
+
+func main() {
+	httpChan := make(chan string)
+	timeOutChan := make(chan string)
+
+	go httpRequest(httpChan)
+	go timeOut(timeOutChan)
+
+	for {
+		select {
+		case httpRes := <-httpChan:
+			fmt.Println(httpRes)
+			return
+
+		case timeOutRes := <-timeOutChan:
+			fmt.Println(timeOutRes)
+			return
+
+		default:
+			fmt.Println("滴答...")
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}
+
+// 执行结果随机，将在随机的滴答之后打印 "网络请求结果" 或 "网络请求超时"
+```
+
+信道非常适合在 Go 程之间通信，但是如果仅仅只是需要在不同的 Go 程之间访问共享的一个变量，为了避免冲突，需要使用互斥锁。互斥锁是 Go 标准库中的一个类型 `sync.Mutex`。它有 `Lock` 和 `Unlock` 两个方法，分别用于变量的加锁与解锁。例：
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+// Accumulator 并发安全的累加器
+type Accumulator struct {
+	sum int
+	mux sync.Mutex
+}
+
+func (c *Accumulator) add(num int) {
+	c.mux.Lock()         // 给变量加锁
+	defer c.mux.Unlock() // 使用 defer 在函数调用结束后解锁
+	c.sum += num
+}
+
+func (c *Accumulator) getValue() int {
+	return c.sum
+}
+
+func main() {
+	c := Accumulator{}
+
+	for i := 0; i < 1000; i++ {
+		go c.add(i) // 循环创建 1000 个异步 go程
+	}
+
+	time.Sleep(time.Second) // 延时等待 1000 个 go程 执行结束
+
+	fmt.Println(c.getValue()) // 获取最终的累加值，如果没有互斥锁，其值可能会小于 0 ~ 1000 的累加和 499500
+}
+```
 
 ## 异常处理
 
-待续。
+Go 当中没有类似其它语言中 `try catch` 的语法。Go 当中有一个内建接口 `Stringer`，它有一个方法 `String`，`String` 方法返回一个字符串以描述自己的类型。Go 当中还有另一个内建接口 `error`，`error` 有一个方法 `Error`，`Error` 方法返回一个字符串以描述错误。fmt 包（还有很多包）都通过这两个接口来打印值。通常函数会返回一个 error 值，调用的它的代码应当判断这个错误是否等于 `nil` 来进行错误处理。例：
+
+```go
+package main
+
+import "fmt"
+
+type MyStruct struct{}
+
+type MyError struct{}
+
+// 隐式实现 Stringer 接口
+func (myStruct *MyStruct) String() string {
+	return "我是 MyStruct 类型的值！"
+}
+
+// 隐式实现 error 接口
+func (myStruct *MyError) Error() string {
+	return "执行失败了，我是一个异常/(ㄒoㄒ)/~~"
+}
+
+func (myStruct *MyStruct) run(isSuccess bool) (string, error) {
+	if !isSuccess {
+		return "", &MyError{}
+	}
+
+	return "执行成功啦~", nil
+}
+
+func main() {
+	myStruct := &MyStruct{}
+
+	fmt.Println(myStruct) // 我是 MyStruct 类型的值！
+
+	if result, err := myStruct.run(true); err == nil {
+		fmt.Println(result) // 执行成功啦~
+	} else {
+		fmt.Println(err)
+	}
+
+	if result, err := myStruct.run(false); err == nil {
+		fmt.Println(result)
+	} else {
+		fmt.Println(err) // 执行失败了，我是一个异常/(ㄒoㄒ)/~~
+	}
+}
+```
