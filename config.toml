@@ -11,6 +11,7 @@ paginate = 10
   fullWidthTheme = false
   centerTheme = true
   # favicon = "favicon.ico"
+  showLastUpdated = true
 
 [languages]
 
