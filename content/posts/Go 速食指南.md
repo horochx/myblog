@@ -1,14 +1,14 @@
 +++
-title = "Golang 速食指南"
-date = 2019-06-22T04:42:41.850Z
+title = "Go 速食指南"
+date = "2019-06-22T12:42:41+08:00"
 author = "horochx" 
 cover = ""
-tags = ["golang", "速食指南"]
-description = "Go 是 Google 于 2009 年 11 月 10 日发布的一门静态强类型、编译型、并发型，并具有垃圾回收功能的编程语言，现在被广泛应用在服务端领域。通过 <a href=\"https://trends.google.com/trends/explore?date=today%205-y&q=%2Fm%2F09gbxjr\" target=\"_blank\">Google Trends</a> 可以看出来，在过去 5 年，Go 的热度始终在上升。通过以下内容，我们可以快速了解一下 Go 语言的基础特性，然后来决定是否深入地学习它。"
+tags = ["Go"]
+description = "Go 是 Google 于 2009 年 11 月 10 日发布的一门静态强类型、编译型、并发型，并具有垃圾回收功能的编程语言，现在被广泛应用在服务端领域。通过 <a href=\"https://trends.google.com/trends/explore?date=today%205-y&geo=CN&q=%2Fm%2F09gbxjr\" target=\"_blank\">Google Trends</a> 可以看出来，在过去 5 年，Go 的热度始终在上升。本文旨在让没有接触过 Go 的开发者快速了解它的语法特性。"
 showFullContent = false
 +++
 
-Go 是 Google 于 2009 年 11 月 10 日发布的一门静态强类型、编译型、并发型，并具有垃圾回收功能的编程语言，现在被广泛应用在服务端领域。通过 <a href="https://trends.google.com/trends/explore?date=today%205-y&q=%2Fm%2F09gbxjr" target="_blank">Google Trends</a> 可以看出来，在过去 5 年，Go 的热度始终在上升。通过以下内容，我们可以快速了解一下 Go 语言的基础特性，然后来决定是否深入地学习它。
+Go 是 Google 于 2009 年 11 月 10 日发布的一门静态强类型、编译型、并发型，并具有垃圾回收功能的编程语言，现在被广泛应用在服务端领域。通过 <a href="https://trends.google.com/trends/explore?date=today%205-y&geo=CN&q=%2Fm%2F09gbxjr" target="_blank">Google Trends</a> 可以看出来，在过去 5 年，Go 的热度始终在上升。本文旨在让没有接触过 Go 的开发者快速了解它的语法特性。
 
 ## 变量定义
 
