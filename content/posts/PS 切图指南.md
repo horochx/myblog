@@ -1,7 +1,6 @@
 +++
 title = "PS 切图指南"
 date = "2017-12-01T21:28:34+08:00"
-author = "horochx" 
 cover = ""
 tags = ["PS"]
 description = "切图是指从设计稿（PSD 文件）中取出视觉素材，产出 PNG、JPG 等格式的图片文件的过程。"

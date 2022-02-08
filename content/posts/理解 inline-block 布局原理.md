@@ -1,7 +1,6 @@
 +++
 title = "理解 inline-block 布局原理"
 date = "2018-01-05T20:12:33+08:00"
-author = "horochx" 
 cover = ""
 tags = ["CSS"]
 description = "博主近日在开发中运用到了大量的 `display: inline-block` 来处理布局问题，踩了许多坑，出现了诸多预料之外的显示效果。在解决了所有 inline-block 的疑难杂症之后，写下了这篇博客，作为一个总结。"
@@ -171,7 +170,7 @@ showFullContent = false
     value="20"
     min="20"
     max="80"
-  />拖动滑块增加元素最小间距，直到元素换行
+  />拖动滑块增加元素最小间距，直到元素换行<span class="only-mobile">(移动端屏幕过窄，看不出效果，可切换至 PC 模式浏览)</span>
 </p>
 <script>
   (function () {
@@ -246,7 +245,7 @@ line-box 是什么呢？每当存在一个行内元素（这里泛指 inline、i
 
 元素与父容器的底边存在一个微小的边距，这是为什么呢？因为 vertical-align 的默认设置是 baseline。所以对齐的是 strut 的 baseline。 我们理解了下边距存在是由于 `vertical-align: baseline` 和 struct 的共同作用之后，很自然的就可以找到办法解决它：更改 vertical-align，不管是 top 也好，bottom 也好，只要不再基于 baseline，都能解决这个问题。（点击上面的 demo 试试看吧~）
 
-PS: 对于没有内容的 inline-block 元素，baseline 是它的 margin-bottom 的边缘。对于有内容的 inline-block 元素，baseline 是它的内容的 baseline。
+PS: **对于没有内容的 inline-block 元素，baseline 是它的 margin-bottom 的边缘。对于有内容的 inline-block 元素，baseline 是它的内容的 baseline。**
 
 ### 设置 `vertical-align: middle` 时的表现
 

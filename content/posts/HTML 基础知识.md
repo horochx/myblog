@@ -1,7 +1,6 @@
 +++
 title = "HTML 基础知识"
 date = "2019-05-13T22:18:47+08:00"
-author = "horochx" 
 cover = ""
 tags = ["HTML"]
 description = '1980 年，欧洲核子研究中心的承包商物理学家 _蒂姆·伯纳斯-李（Tim Berners-Lee）_ 提出了一个构想：创建一个以超文本系统为基础的项目，方便研究人员分享及更新讯息。同时，他创建了一个原型系统，叫 _ENQUIRE_ 。_蒂姆·伯纳斯-李_ 后来用与 _ENQUIRE_ 相似的概念，创建了万维网，完成了世界上第一个浏览器，成立了 <abbr title="World Wide Web Consortium">W3C</abbr> 并担任主席。这就是 <abbr title="HyperText Markup Language">HTML</abbr> 和万维网最初的起源。'
